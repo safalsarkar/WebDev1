@@ -11,9 +11,7 @@ exports.handler = async (event, context) => {
     }
 
 
-    const { id } = event.queryStringParameters;
 
- 
     const connection = await mysql.createConnection({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
@@ -21,34 +19,27 @@ exports.handler = async (event, context) => {
       database: process.env.DB_NAME
     });
 
-    const query = 'SELECT * FROM contacts WHERE id = ?';
+
+    const query = 'SELECT * FROM notes';
 
 
-    const [rows] = await connection.execute(query, [id]);
+    const [rows] = await connection.execute(query);
 
   
     await connection.end();
 
-    if (rows.length === 0) {
-      return {
-        statusCode: 404,
-        body: JSON.stringify({ message: "Contact not found" })
-      };
-    }
-
 
     return {
       statusCode: 200,
-      body: JSON.stringify(rows[0])
+      body: JSON.stringify(rows)
     };
   } catch (error) {
 
     console.error('Error:', error.message);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Failed to read contact", details: error.message })
+      body: JSON.stringify({ error: 'Failed to read notes', details: error.message })
     };
   }
 };
-
 

@@ -11,9 +11,10 @@ exports.handler = async (event, context) => {
     }
 
 
-    const { id } = event.queryStringParameters;
 
- 
+    const { id, note } = JSON.parse(event.body);
+
+
     const connection = await mysql.createConnection({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
@@ -21,34 +22,27 @@ exports.handler = async (event, context) => {
       database: process.env.DB_NAME
     });
 
-    const query = 'SELECT * FROM contacts WHERE id = ?';
+
+    const query = 'UPDATE notes SET note = ?, updated_at = NOW() WHERE id = ?';
 
 
-    const [rows] = await connection.execute(query, [id]);
+    await connection.execute(query, [note, id]);
 
-  
+
     await connection.end();
 
-    if (rows.length === 0) {
-      return {
-        statusCode: 404,
-        body: JSON.stringify({ message: "Contact not found" })
-      };
-    }
-
-
+ successfully
     return {
       statusCode: 200,
-      body: JSON.stringify(rows[0])
+      body: JSON.stringify({ message: "Note updated successfully" })
     };
   } catch (error) {
 
     console.error('Error:', error.message);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Failed to read contact", details: error.message })
+      body: JSON.stringify({ error: "Failed to update note", details: error.message })
     };
   }
 };
-
 
